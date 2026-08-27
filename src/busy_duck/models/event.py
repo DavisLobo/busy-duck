@@ -52,3 +52,5 @@ class Event(BaseModel):
         if self.start_datetime >= self.end_datetime:
             raise ValueError("Start datetime must be before end datetime")
         return self
+    
+    
