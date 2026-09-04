@@ -1,26 +1,21 @@
 from pathlib import Path
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
+
+from busy_duck.database.models.base import Base
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+DATABASE_DIRECTORY = PROJECT_ROOT / "data"
+DATABASE_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
+ENGINE = create_engine(f"sqlite:///{DATABASE_DIRECTORY / 'busy_duck.db'}")
+SessionLocal = sessionmaker(bind=ENGINE, autoflush=False, autocommit=False)
 
 
+def initialize_database() -> None:
+    Base.metadata.create_all(bind=ENGINE)
 
-DATABASE_DIRECTORY = Path("database")
-DATABASE_DIRECTORY.mkdir(exist_ok=True)
-
-DATABASE_PATH = DATABASE_DIRECTORY / "busy_duck.db"
-DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
-
-engine = create_engine(
-    DATABASE_URL,
-    echo=False
-)
-
-SessionLocal = sessionmaker(
-    bind=engine,
-    autoflush=False,
-    autocommit=False
-)
 
 def get_session() -> Session:
-    """Get a new database session."""
     return SessionLocal()

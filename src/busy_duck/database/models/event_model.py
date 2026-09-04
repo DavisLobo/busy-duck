@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import DateTime, ForeignKey, String, Text
@@ -10,26 +10,45 @@ from busy_duck.database.models.base import Base
 class EventModel(Base):
     __tablename__ = "events"
 
-    id: Mapped[str] = mapped_column(String(36),primary_key=True,default=lambda: str(uuid4()))
-
-    calendar_id: Mapped[str] = mapped_column(ForeignKey("calendars.id"))
-
-    provider_id: Mapped[str] = mapped_column(ForeignKey("providers.id"))
-
-    account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"))
-
-    external_id: Mapped[str] = mapped_column(String(255),index=True)
-
-    title: Mapped[str] = mapped_column(String(255))
-
-    description: Mapped[str | None] = mapped_column(Text,nullable=True)
-
-    location: Mapped[str | None] = mapped_column(String(255),nullable=True)
-
-    start_datetime: Mapped[datetime] = mapped_column(DateTime)
-
-    end_datetime: Mapped[datetime] = mapped_column(DateTime)
-
-    created_at: Mapped[datetime] = mapped_column(DateTime)
-
-    updated_at: Mapped[datetime] = mapped_column(DateTime)
+    id: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+        default=lambda: str(uuid4()),
+    )
+    calendar_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("calendars.id"),
+        nullable=False,
+    )
+    provider_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("providers.id"),
+        nullable=False,
+    )
+    account_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("accounts.id"),
+        nullable=False,
+    )
+    external_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    location: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    start_datetime: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    end_datetime: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
