@@ -29,6 +29,7 @@ from busy_duck.app import (
 )
 from busy_duck.ui.event_table_model import EventTableModel
 from busy_duck.ui.theme import DARK_THEME, LIGHT_THEME
+from busy_duck.ui.account_setup import AccountSetupDialog
 
 
 class MainWindow(QMainWindow):
@@ -117,6 +118,11 @@ class MainWindow(QMainWindow):
         local = QLabel("LOCAL-FIRST STORAGE\nSQLite database · Read-only sync")
         local.setObjectName("localStorage")
         layout.addWidget(local)
+
+        accounts_button = QPushButton("Accounts")
+        accounts_button.setObjectName("navButton")
+        accounts_button.clicked.connect(self.open_account_setup)
+        layout.addWidget(accounts_button)
 
         return sidebar
 
@@ -408,3 +414,92 @@ class MainWindow(QMainWindow):
                 f"{row.get('Description', '')}"
             ),
         )
+
+    def open_account_setup(self) -> None:
+        dialog = AccountSetupDialog(self)
+        dialog.setStyleSheet(self.styleSheet())
+
+        if dialog.exec():
+            self.refresh_events()
+
+
+class AccountSetupDialog(QDialog):
+    def __init__(self, parent: MainWindow) -> None:
+        super().__init__(parent)
+
+        self.setWindowTitle("Account setup")
+        self.resize(400, 300)
+
+        layout = QVBoxLayout(self)
+
+        self.provider_label = QLabel("Provider")
+        self.provider_label.setObjectName("providerLabel")
+
+        self.provider_combo = QComboBox()
+        self.provider_combo.addItems(["Google Calendar", "Microsoft Outlook"])
+        self.provider_combo.setObjectName("providerCombo")
+
+        self.email_label = QLabel("Email")
+        self.email_label.setObjectName("emailLabel")
+
+        self.email_input = QLineEdit()
+        self.email_input.setObjectName("emailInput")
+
+        self.password_label = QLabel("Password")
+        self.password_label.setObjectName("passwordLabel")
+
+        self.password_input = QLineEdit()
+        self.password_input.setObjectName("passwordInput")
+        self.password_input.setEchoMode(QLineEdit.Password)
+
+        self.submit_button = QPushButton("Submit")
+        self.submit_button.setObjectName("primaryButton")
+        self.submit_button.clicked.connect(self.accept)
+
+        layout.addWidget(self.provider_label)
+        layout.addWidget(self.provider_combo)
+        layout.addWidget(self.email_label)
+        layout.addWidget(self.email_input)
+        layout.addWidget(self.password_label)
+        layout.addWidget(self.password_input)
+        layout.addWidget(self.submit_button)
+
+        self.setStyleSheet(
+            """
+            QDialog {
+                background: #101A20;
+            }
+
+            QListWidget {
+                background: #182A31;
+                color: #E6EEF0;
+                border: 1px solid #304950;
+                border-radius: 9px;
+                padding: 6px;
+            }
+
+            QListWidget::item {
+                padding: 10px;
+                border-radius: 6px;
+            }
+
+            QListWidget::item:selected {
+                background: #D4E8E6;
+                color: #173F46;
+            }
+            """
+        )
+
+    def accept(self) -> None:
+        provider = self.provider_combo.currentText()
+        email = self.email_input.text()
+        password = self.password_input.text()
+
+        if not provider or not email or not password:
+            QMessageBox.critical(self, "Account setup", "Please fill in all fields")
+            return
+
+        self.accepted_provider = provider
+        self.accepted_email = email
+        self.accepted_password = password
+        super().accept()

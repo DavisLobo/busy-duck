@@ -9,6 +9,8 @@ from busy_duck.services.calendar_service import CalendarService
 from busy_duck.repositories.calendar_repository import CalendarRepository
 from busy_duck.repositories.event_repository import EventRepository
 from busy_duck.services.multi_provider_sync_service import MultiProviderSyncService
+from busy_duck.database.models.account_model import AccountModel
+from busy_duck.database.models.provider_model import ProviderModel
 
 
 def bootstrap_app() -> None:
@@ -83,6 +85,35 @@ def get_analytics_for_window(
         "conflicts_count": len(conflicts),
         "free_time": free_time,
     }
+
+
+def get_connected_accounts() -> list[dict[str, str]]:
+    session = get_session()
+
+    try:
+        rows = (
+            session.query(AccountModel, ProviderModel)
+            .join(
+                ProviderModel,
+                AccountModel.provider_id == ProviderModel.id,
+            )
+            .filter(AccountModel.is_active.is_(True))
+            .order_by(ProviderModel.name, AccountModel.email)
+            .all()
+        )
+
+        return [
+            {
+                "id": str(account.id),
+                "provider": provider.name,
+                "slug": provider.slug,
+                "email": account.email,
+                "username": account.username,
+            }
+            for account, provider in rows
+        ]
+    finally:
+        session.close()
 
 
 def main() -> None:
