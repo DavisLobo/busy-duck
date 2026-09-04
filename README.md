@@ -278,3 +278,53 @@ Busy Duck is an early MVP. The next major development areas are:
 ## License
 
 Busy Duck is distributed under the GNU General Public License v3. See [LICENSE](LICENSE).
+
+## Building releases
+
+GitHub Actions builds supported desktop packages automatically.
+
+Create and push a version tag:
+
+```bash
+git add .
+git commit -m "Prepare release 0.1.0"
+git tag v0.1.0
+git push origin main
+git push origin v0.1.0
+```
+
+The release workflow produces:
+
+- `busy-duck-windows.zip`
+- `busy-duck-linux.tar.gz`
+
+### Windows
+
+1. Download `busy-duck-windows.zip` from GitHub Releases.
+2. Extract the archive.
+3. Run `busy_duck.exe`.
+
+### Linux
+
+```bash
+tar -xzf busy-duck-linux.tar.gz
+cd busy_duck
+./busy_duck
+```
+
+The Linux build requires a graphical desktop environment and compatible Qt libraries.
+
+Application data is stored locally. Provider credentials should be configured through the application Settings screen and must not be committed to Git.
+
+## Local release build
+
+```bash
+python -m pip install -e ".[build]"
+python -m PyInstaller --noconfirm --clean build.spec
+```
+
+The generated application is placed in:
+
+```text
+dist/busy_duck/
+```
