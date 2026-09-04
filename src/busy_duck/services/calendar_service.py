@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from busy_duck.database.models.calendar_model import CalendarModel
 from busy_duck.database.models.event_model import EventModel
 from busy_duck.repositories.calendar_repository import CalendarRepository
 from busy_duck.repositories.event_repository import EventRepository
@@ -14,7 +15,7 @@ class CalendarService:
         self.calendar_repository = calendar_repository
         self.event_repository = event_repository
 
-    def list_active_calendars(self):
+    def list_active_calendars(self) -> list[CalendarModel]:
         return self.calendar_repository.find_active()
 
     def list_events(

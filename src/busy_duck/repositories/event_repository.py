@@ -1,6 +1,8 @@
-from sqlalchemy.orm import Session
-from busy_duck.database.models.event_model import EventModel
 from datetime import datetime
+
+from sqlalchemy.orm import Session
+
+from busy_duck.database.models.event_model import EventModel
 
 class EventRepository:
     def __init__(self, session: Session):
