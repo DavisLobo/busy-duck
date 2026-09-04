@@ -15,6 +15,23 @@ class EventRepository:
         self.session.refresh(event)
         return event
 
+    def save_or_update(self, event: EventModel) -> EventModel:
+        existing = self.find_by_provider_and_external_id(event.provider_id, event.external_id)
+        if existing is None:
+            return self.save(event)
+
+        existing.calendar_id = event.calendar_id
+        existing.account_id = event.account_id
+        existing.title = event.title
+        existing.description = event.description
+        existing.location = event.location
+        existing.start_datetime = event.start_datetime
+        existing.end_datetime = event.end_datetime
+        existing.updated_at = event.updated_at
+        self.session.commit()
+        self.session.refresh(existing)
+        return existing
+
     def find_by_id(self, event_id: str) -> EventModel | None:
         return self.session.query(EventModel).filter(EventModel.id == event_id).first()
 

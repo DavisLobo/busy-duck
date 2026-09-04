@@ -3,14 +3,25 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+from busy_duck.config import settings
 from busy_duck.providers.base_provider import BaseProvider
 
 
 class GoogleProvider(BaseProvider):
     provider_name = "google"
 
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
+        super().__init__(config)
+        self.client: Any | None = None
+
     def connect(self) -> None:
-        self.client = {"connected": True, "provider": self.name}
+        # Replace this with real Google OAuth client creation.
+        self.client = {
+            "connected": True,
+            "provider": self.name,
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+        }
 
     def fetch_events(
         self,
@@ -24,7 +35,7 @@ class GoogleProvider(BaseProvider):
                 "external_id": "google-event-1",
                 "calendar_id": "calendar-google-primary",
                 "title": "Daily sync",
-                "description": "Reunião diária",
+                "description": "Daily sync with team",
                 "location": "Remote",
                 "start_datetime": datetime(2025, 1, 1, 9, 0),
                 "end_datetime": datetime(2025, 1, 1, 10, 0),
@@ -33,7 +44,7 @@ class GoogleProvider(BaseProvider):
                 "external_id": "google-event-2",
                 "calendar_id": "calendar-google-primary",
                 "title": "Planning",
-                "description": "Planejamento",
+                "description": "Sprint planning",
                 "location": "Office",
                 "start_datetime": datetime(2025, 1, 1, 9, 30),
                 "end_datetime": datetime(2025, 1, 1, 10, 30),

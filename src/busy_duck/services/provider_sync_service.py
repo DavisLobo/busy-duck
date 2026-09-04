@@ -71,7 +71,7 @@ class ProviderSyncService:
         calendar_id: str,
         raw_events: list[dict[str, Any]],
     ) -> int:
-        normalized = []
+        normalized: list[dict[str, Any]] = []
         for raw_event in raw_events:
             event_data = dict(raw_event)
             event_data["calendar_id"] = calendar_id

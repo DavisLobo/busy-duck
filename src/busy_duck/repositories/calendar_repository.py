@@ -25,7 +25,11 @@ class CalendarRepository:
         )
 
     def find_by_external_id(self, external_id: str) -> CalendarModel | None:
-        return self.session.query(CalendarModel).filter(CalendarModel.external_id == external_id).first()
+        return (
+            self.session.query(CalendarModel)
+            .filter(CalendarModel.external_id == external_id)
+            .first()
+        )
 
     def find_active(self) -> list[CalendarModel]:
         return (

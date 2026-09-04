@@ -5,9 +5,8 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from busy_duck.database.models.base import Base
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-DATABASE_DIRECTORY = PROJECT_ROOT / "database"
+DATABASE_DIRECTORY = PROJECT_ROOT / "data"
 DATABASE_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
 ENGINE = create_engine(f"sqlite:///{DATABASE_DIRECTORY / 'busy_duck.db'}")
