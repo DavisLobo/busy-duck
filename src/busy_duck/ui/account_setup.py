@@ -14,12 +14,18 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from busy_duck.app import get_connected_accounts, sync_all
+from busy_duck.app import (
+    get_connected_accounts,
+    sync_all,
+    update_account,
+)
 
 
 class AccountSetupDialog(QDialog):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
+        self.editing_account_id: str | None = None
+        self._accounts_loaded = False
 
         self.setWindowTitle("Account setup · Busy Duck")
         self.setMinimumSize(560, 520)
@@ -109,16 +115,21 @@ class AccountSetupDialog(QDialog):
             item = QListWidgetItem("No accounts connected yet.")
             item.setFlags(Qt.NoItemFlags)
             self.accounts_list.addItem(item)
+            self._accounts_loaded = True
             return
 
         for account in accounts:
             item = QListWidgetItem(
-                f"●  {account['provider']}  ·  "
-                f"{account['email']}\n"
-                f"    {account['username']}"
+                f"●  {account['provider']}  ·  {account['email']}\n"
+                f"    {account['username']}  ·  Double-click to edit"
             )
             item.setData(Qt.UserRole, account)
             self.accounts_list.addItem(item)
+
+            if not self._accounts_loaded:
+                self.accounts_list.itemDoubleClicked.connect(self._edit_account)
+                self._accounts_loaded = True
+        self._accounts_loaded = True
 
     def _connect_account(self) -> None:
         email = self.email.text().strip()
@@ -139,29 +150,36 @@ class AccountSetupDialog(QDialog):
         self.connect_button.setText("Connecting…")
 
         try:
-            sync_all(
-                provider_configs=[
-                    {
-                        "provider_name": provider_name,
-                        "email": email,
-                        "username": username,
-                        "external_calendar_id": (
-                            f"{provider_name}-{email}-primary"
-                        ),
-                        "calendar_name": calendar_name,
-                    }
-                ]
-            )
+            if self.editing_account_id is not None:
+                update_account(
+                    account_id=self.editing_account_id,
+                    username=username,
+                    email=email,
+                )
+                message = f"{email} was updated successfully."
+            else:
+                sync_all(
+                    provider_configs=[
+                        {
+                            "provider_name": provider_name,
+                            "email": email,
+                            "username": username,
+                            "external_calendar_id": (
+                                f"{provider_name}-{email}-primary"
+                            ),
+                            "calendar_name": calendar_name,
+                        }
+                    ]
+                )
+                message = f"{email} was added successfully."
 
             self._load_accounts()
+            self.editing_account_id = None
             self.email.clear()
             self.username.clear()
+            self.connect_button.setText("Connect account")
 
-            QMessageBox.information(
-                self,
-                "Account connected",
-                f"{email} was added successfully.",
-            )
+            QMessageBox.information(self, "Account saved", message)
         except Exception as exc:
             QMessageBox.critical(
                 self,
@@ -171,3 +189,15 @@ class AccountSetupDialog(QDialog):
         finally:
             self.connect_button.setEnabled(True)
             self.connect_button.setText("Connect account")
+
+    def _edit_account(self, item: QListWidgetItem) -> None:
+        account = item.data(Qt.UserRole)
+
+        self.provider.setCurrentIndex(
+            self.provider.findData(account["slug"])
+        )
+        self.email.setText(account["email"])
+        self.username.setText(account["username"])
+
+        self.editing_account_id: str | None = account["id"]
+        self.connect_button.setText("Save changes")

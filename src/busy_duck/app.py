@@ -97,7 +97,6 @@ def get_connected_accounts() -> list[dict[str, str]]:
                 ProviderModel,
                 AccountModel.provider_id == ProviderModel.id,
             )
-            .filter(AccountModel.is_active.is_(True))
             .order_by(ProviderModel.name, AccountModel.email)
             .all()
         )
@@ -112,6 +111,26 @@ def get_connected_accounts() -> list[dict[str, str]]:
             }
             for account, provider in rows
         ]
+    finally:
+        session.close()
+
+
+def update_account(
+    account_id: str,
+    username: str,
+    email: str,
+) -> None:
+    session = get_session()
+
+    try:
+        account = session.get(AccountModel, account_id)
+        if account is None:
+            raise ValueError("Account was not found.")
+
+        account.username = username
+        account.email = email
+        account.updated_at = datetime.now()
+        session.commit()
     finally:
         session.close()
 

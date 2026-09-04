@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, time, timedelta
 
-from PySide6.QtCore import QDate, Qt, QItemSelection, QItemSelectionModel
+from PySide6.QtCore import QDate, Qt, QItemSelection, QStackedWidget
 from PySide6.QtGui import QAction, QColor, QFont
 from PySide6.QtWidgets import (
     QApplication,
@@ -16,7 +16,6 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QDateEdit,
-    QSizePolicy,
     QTableView,
     QVBoxLayout,
     QWidget,
@@ -65,7 +64,37 @@ class MainWindow(QMainWindow):
         layout.setSpacing(0)
 
         layout.addWidget(self._build_sidebar())
-        layout.addWidget(self._build_content(), 1)
+
+        self.pages = QStackedWidget()
+        self.calendar_page = self._build_content()
+        self.pages.addWidget(self.calendar_page)
+        self.pages.addWidget(self._build_info_page(
+            "Availability",
+            "Your available time will appear here after calendars are synchronized.",
+        ))
+        self.pages.addWidget(self._build_info_page(
+            "Insights",
+            "Calendar analytics and productivity insights are coming soon.",
+        ))
+        layout.addWidget(self.pages, 1)
+
+    def _build_info_page(self, title: str, description: str) -> QWidget:
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(40, 34, 40, 30)
+
+        heading = QLabel(title)
+        heading.setObjectName("pageTitle")
+
+        text = QLabel(description)
+        text.setObjectName("pageSubtitle")
+        text.setWordWrap(True)
+
+        layout.addWidget(heading)
+        layout.addWidget(text)
+        layout.addStretch()
+
+        return page
 
     def _build_sidebar(self) -> QWidget:
         sidebar = QFrame()
@@ -87,11 +116,28 @@ class MainWindow(QMainWindow):
 
         layout.addSpacing(28)
 
-        for label in ("Overview", "Calendar", "Availability", "Insights"):
+        self.nav_buttons = {}
+
+        navigation = (
+            ("Overview", 0),
+            ("Calendar", 0),
+            ("Availability", 1),
+            ("Insights", 2),
+        )
+
+        for label, page_index in navigation:
             button = QPushButton(label)
             button.setObjectName("navButton")
-            button.setEnabled(label == "Calendar")
+            button.setCursor(Qt.PointingHandCursor)
+            button.setCheckable(True)
+            button.clicked.connect(
+                lambda checked=False, index=page_index, name=label:
+                self.select_page(index, name)
+            )
+            self.nav_buttons[label] = button
             layout.addWidget(button)
+
+        self.nav_buttons["Calendar"].setChecked(True)
 
         layout.addSpacing(24)
 
@@ -121,6 +167,7 @@ class MainWindow(QMainWindow):
 
         accounts_button = QPushButton("Accounts")
         accounts_button.setObjectName("navButton")
+        accounts_button.setCursor(Qt.PointingHandCursor)
         accounts_button.clicked.connect(self.open_account_setup)
         layout.addWidget(accounts_button)
 
@@ -148,9 +195,8 @@ class MainWindow(QMainWindow):
         header.addStretch()
 
         self.theme_button = QPushButton("☾")
-        self.theme_button.setToolTip("Toggle dark mode")
-        self.theme_button.clicked.connect(self.toggle_theme)
-        header.addWidget(self.theme_button)
+        self.theme_button.setObjectName("themeButton")
+        self.theme_button.setCursor(Qt.PointingHandCursor)
 
         self.sync_button = QPushButton("↻  Sync calendars")
         self.sync_button.setObjectName("primaryButton")
@@ -423,83 +469,11 @@ class MainWindow(QMainWindow):
             self.refresh_events()
 
 
-class AccountSetupDialog(QDialog):
-    def __init__(self, parent: MainWindow) -> None:
-        super().__init__(parent)
+    def select_page(self, index: int, name: str) -> None:
+        self.pages.setCurrentIndex(index)
 
-        self.setWindowTitle("Account setup")
-        self.resize(400, 300)
+        for label, button in self.nav_buttons.items():
+            button.setChecked(label == name)
 
-        layout = QVBoxLayout(self)
-
-        self.provider_label = QLabel("Provider")
-        self.provider_label.setObjectName("providerLabel")
-
-        self.provider_combo = QComboBox()
-        self.provider_combo.addItems(["Google Calendar", "Microsoft Outlook"])
-        self.provider_combo.setObjectName("providerCombo")
-
-        self.email_label = QLabel("Email")
-        self.email_label.setObjectName("emailLabel")
-
-        self.email_input = QLineEdit()
-        self.email_input.setObjectName("emailInput")
-
-        self.password_label = QLabel("Password")
-        self.password_label.setObjectName("passwordLabel")
-
-        self.password_input = QLineEdit()
-        self.password_input.setObjectName("passwordInput")
-        self.password_input.setEchoMode(QLineEdit.Password)
-
-        self.submit_button = QPushButton("Submit")
-        self.submit_button.setObjectName("primaryButton")
-        self.submit_button.clicked.connect(self.accept)
-
-        layout.addWidget(self.provider_label)
-        layout.addWidget(self.provider_combo)
-        layout.addWidget(self.email_label)
-        layout.addWidget(self.email_input)
-        layout.addWidget(self.password_label)
-        layout.addWidget(self.password_input)
-        layout.addWidget(self.submit_button)
-
-        self.setStyleSheet(
-            """
-            QDialog {
-                background: #101A20;
-            }
-
-            QListWidget {
-                background: #182A31;
-                color: #E6EEF0;
-                border: 1px solid #304950;
-                border-radius: 9px;
-                padding: 6px;
-            }
-
-            QListWidget::item {
-                padding: 10px;
-                border-radius: 6px;
-            }
-
-            QListWidget::item:selected {
-                background: #D4E8E6;
-                color: #173F46;
-            }
-            """
-        )
-
-    def accept(self) -> None:
-        provider = self.provider_combo.currentText()
-        email = self.email_input.text()
-        password = self.password_input.text()
-
-        if not provider or not email or not password:
-            QMessageBox.critical(self, "Account setup", "Please fill in all fields")
-            return
-
-        self.accepted_provider = provider
-        self.accepted_email = email
-        self.accepted_password = password
-        super().accept()
+        if index == 0:
+            self.refresh_events()

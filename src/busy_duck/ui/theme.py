@@ -142,6 +142,22 @@ QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical {
     height: 0;
 }
+
+QLabel#pageTitle,
+QLabel#sectionHeading,
+QLabel#metricValue {
+    color: #173F46;
+}
+
+QLabel#metricLabel,
+QLabel#sectionTitle {
+    color: #60777C;
+}
+
+QLabel#providerLabel,
+QLabel#localStorage {
+    color: #52666D;
+}
 """
 
 DARK_THEME = """
@@ -283,5 +299,21 @@ QScrollBar::handle:vertical {
 QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical {
     height: 0;
+}
+
+QLabel#pageTitle,
+QLabel#sectionHeading,
+QLabel#metricValue {
+    color: #F1F7F8;
+}
+
+QLabel#metricLabel,
+QLabel#sectionTitle {
+    color: #9AAEB3;
+}
+
+QLabel#providerLabel,
+QLabel#localStorage {
+    color: #C0D0D4;
 }
 """
