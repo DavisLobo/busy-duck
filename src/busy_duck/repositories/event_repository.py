@@ -19,7 +19,11 @@ class EventRepository:
         return self.session.query(EventModel).all()
     
     def find_by_calendar_id(self, calendar_id: str) -> list[EventModel]:
-        return self.session.filter(EventModel.calendar_id == calendar_id).all()
+        return (
+            self.session.query(EventModel)
+            .filter(EventModel.calendar_id == calendar_id)
+            .all()
+        )
     
     def find_by_external_id(self, external_id: str) -> EventModel | None:
         return self.session.query(EventModel).filter(EventModel.external_id == external_id).first()
