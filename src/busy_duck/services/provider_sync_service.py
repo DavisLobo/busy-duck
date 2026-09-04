@@ -11,6 +11,26 @@ class ProviderSyncService:
     def __init__(self, event_repository: EventRepository) -> None:
         self.event_repository = event_repository
 
+    def _normalize_event(
+        self,
+        provider_id: str,
+        account_id: str,
+        raw_event: dict[str, Any],
+    ) -> EventModel:
+        return EventModel(
+            calendar_id=raw_event["calendar_id"],
+            provider_id=provider_id,
+            account_id=account_id,
+            external_id=str(raw_event["external_id"]),
+            title=str(raw_event["title"]),
+            description=raw_event.get("description"),
+            location=raw_event.get("location"),
+            start_datetime=raw_event["start_datetime"],
+            end_datetime=raw_event["end_datetime"],
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        )
+
     def sync_provider_events(
         self,
         provider_id: str,
@@ -20,19 +40,7 @@ class ProviderSyncService:
         synchronized = 0
 
         for raw_event in raw_events:
-            event = EventModel(
-                calendar_id=raw_event["calendar_id"],
-                provider_id=provider_id,
-                account_id=account_id,
-                external_id=raw_event["external_id"],
-                title=raw_event["title"],
-                description=raw_event.get("description"),
-                location=raw_event.get("location"),
-                start_datetime=raw_event["start_datetime"],
-                end_datetime=raw_event["end_datetime"],
-                created_at=datetime.now(),
-                updated_at=datetime.now(),
-            )
+            event = self._normalize_event(provider_id, account_id, raw_event)
 
             existing = self.event_repository.find_by_provider_and_external_id(
                 provider_id,
@@ -55,3 +63,18 @@ class ProviderSyncService:
             synchronized += 1
 
         return synchronized
+
+    def sync_events_for_calendar(
+        self,
+        provider_id: str,
+        account_id: str,
+        calendar_id: str,
+        raw_events: list[dict[str, Any]],
+    ) -> int:
+        normalized = []
+        for raw_event in raw_events:
+            event_data = dict(raw_event)
+            event_data["calendar_id"] = calendar_id
+            normalized.append(event_data)
+
+        return self.sync_provider_events(provider_id, account_id, normalized)

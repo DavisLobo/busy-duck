@@ -17,7 +17,6 @@ class BaseProvider(ABC):
 
     @abstractmethod
     def connect(self) -> None:
-        """Estabelece a conexão com o provedor."""
         raise NotImplementedError
 
     @abstractmethod
@@ -26,5 +25,4 @@ class BaseProvider(ABC):
         start_datetime: datetime,
         end_datetime: datetime,
     ) -> list[dict[str, Any]]:
-        """Retorna eventos em formato bruto para serem normalizados."""
         raise NotImplementedError

@@ -9,13 +9,7 @@ from busy_duck.providers.base_provider import BaseProvider
 class GoogleProvider(BaseProvider):
     provider_name = "google"
 
-    def __init__(self, config: dict[str, Any] | None = None) -> None:
-        super().__init__(config)
-        self.client: Any | None = None
-
     def connect(self) -> None:
-        # Aqui entraria OAuth2 / Google API client.
-        # Por enquanto, a conexão é apenas um stub.
         self.client = {"connected": True, "provider": self.name}
 
     def fetch_events(
@@ -25,13 +19,10 @@ class GoogleProvider(BaseProvider):
     ) -> list[dict[str, Any]]:
         self.connect()
 
-        # Exemplo de payload em formato bruto.
-        # Em produção, isso viria do Google Calendar API.
         return [
             {
                 "external_id": "google-event-1",
-                "calendar_external_id": "primary",
-                "calendar_name": "Principal",
+                "calendar_id": "calendar-google-primary",
                 "title": "Daily sync",
                 "description": "Reunião diária",
                 "location": "Remote",
@@ -40,10 +31,9 @@ class GoogleProvider(BaseProvider):
             },
             {
                 "external_id": "google-event-2",
-                "calendar_external_id": "primary",
-                "calendar_name": "Principal",
+                "calendar_id": "calendar-google-primary",
                 "title": "Planning",
-                "description": "Planejamento de sprint",
+                "description": "Planejamento",
                 "location": "Office",
                 "start_datetime": datetime(2025, 1, 1, 9, 30),
                 "end_datetime": datetime(2025, 1, 1, 10, 30),
