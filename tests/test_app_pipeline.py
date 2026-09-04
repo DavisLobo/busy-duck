@@ -39,7 +39,7 @@ def test_bootstrap_initializes_database(monkeypatch):
 def test_event_sync_calendar_and_analytics_pipeline():
     session = create_session()
 
-    now = datetime.utcnow()
+    now = datetime.now()
 
     provider = ProviderModel(
         name="Test Provider",
