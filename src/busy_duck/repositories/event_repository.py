@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from busy_duck.database.models.event_model import EventModel
+from datetime import datetime
 
 class EventRepository:
     def __init__(self, session: Session):
@@ -31,3 +32,18 @@ class EventRepository:
     def delete(self, event: EventModel) -> None:
         self.session.delete(event)
         self.session.commit()
+
+    def find_between(
+        self,
+        start_datetime: datetime,
+        end_datetime: datetime,
+    ) -> list[EventModel]:
+        return (
+            self.session.query(EventModel)
+            .filter(
+                EventModel.start_datetime < end_datetime,
+                EventModel.end_datetime > start_datetime,
+            )
+            .order_by(EventModel.start_datetime)
+            .all()
+        )
