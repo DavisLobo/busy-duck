@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from datetime import datetime, time, timedelta
+from datetime import datetime, time
 
 from PySide6.QtCore import QDate, Qt, QItemSelection
-from PySide6.QtGui import QAction, QColor, QFont
+from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
-    QApplication,
     QComboBox,
     QFrame,
     QGridLayout,
@@ -30,6 +29,7 @@ from busy_duck.app import (
 from busy_duck.ui.event_table_model import EventTableModel
 from busy_duck.ui.theme import DARK_THEME, LIGHT_THEME
 from busy_duck.ui.account_setup import AccountSetupDialog
+from busy_duck.ui.settings_dialog import SettingsDialog
 
 
 class MainWindow(QMainWindow):
@@ -204,6 +204,12 @@ class MainWindow(QMainWindow):
         accounts_button.setCursor(Qt.PointingHandCursor)
         accounts_button.clicked.connect(self.open_account_setup)
         layout.addWidget(accounts_button)
+
+        settings_button = QPushButton("Settings")
+        settings_button.setObjectName("navButton")
+        settings_button.setCursor(Qt.PointingHandCursor)
+        settings_button.clicked.connect(self.open_settings)
+        layout.addWidget(settings_button)
 
         return sidebar
 
@@ -517,3 +523,8 @@ class MainWindow(QMainWindow):
 
         if name == "Calendar":
             self.refresh_events()
+
+    def open_settings(self) -> None:
+        dialog = SettingsDialog(self)
+        dialog.setStyleSheet(self.styleSheet())
+        dialog.exec()
