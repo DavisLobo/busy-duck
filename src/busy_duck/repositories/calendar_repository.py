@@ -11,19 +11,16 @@ class CalendarRepository:
         self.session.add(calendar)
         self.session.commit()
         self.session.refresh(calendar)
-
         return calendar
 
     def find_by_id(self, calendar_id: str) -> CalendarModel | None:
         return self.session.query(CalendarModel).filter(CalendarModel.id == calendar_id).first()
 
-    def find_all(self) -> list[CalendarModel]:
-        return self.session.query(CalendarModel).all()
-
     def find_by_account_id(self, account_id: str) -> list[CalendarModel]:
         return (
             self.session.query(CalendarModel)
             .filter(CalendarModel.account_id == account_id)
+            .order_by(CalendarModel.name)
             .all()
         )
 

@@ -11,7 +11,6 @@ class AccountRepository:
         self.session.add(account)
         self.session.commit()
         self.session.refresh(account)
-
         return account
 
     def find_by_id(self, account_id: str) -> AccountModel | None:

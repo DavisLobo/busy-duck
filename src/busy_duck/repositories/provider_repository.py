@@ -14,22 +14,7 @@ class ProviderRepository:
         return provider
 
     def find_by_id(self, provider_id: str) -> ProviderModel | None:
-        return (
-            self.session.query(ProviderModel)
-            .filter(ProviderModel.id == provider_id)
-            .first()
-        )
+        return self.session.query(ProviderModel).filter(ProviderModel.id == provider_id).first()
 
     def find_by_slug(self, slug: str) -> ProviderModel | None:
-        return (
-            self.session.query(ProviderModel)
-            .filter(ProviderModel.slug == slug)
-            .first()
-        )
-
-    def find_all(self) -> list[ProviderModel]:
-        return self.session.query(ProviderModel).all()
-
-    def delete(self, provider: ProviderModel) -> None:
-        self.session.delete(provider)
-        self.session.commit()
+        return self.session.query(ProviderModel).filter(ProviderModel.slug == slug).first()

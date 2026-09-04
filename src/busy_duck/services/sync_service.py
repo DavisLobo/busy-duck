@@ -12,13 +12,16 @@ class SyncService:
         synchronized = 0
 
         for incoming_event in events:
-            existing_event = self.event_repository.find_by_external_id(
-                incoming_event.external_id
+            existing_event = self.event_repository.find_by_provider_and_external_id(
+                incoming_event.provider_id,
+                incoming_event.external_id,
             )
 
             if existing_event is None:
                 self.event_repository.save(incoming_event)
             else:
+                existing_event.calendar_id = incoming_event.calendar_id
+                existing_event.account_id = incoming_event.account_id
                 existing_event.title = incoming_event.title
                 existing_event.description = incoming_event.description
                 existing_event.location = incoming_event.location
