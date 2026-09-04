@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#33415C"/>
+      <stop offset="1" stop-color="#222D42"/>
+    </linearGradient>
+    <linearGradient id="headG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4E9E57"/>
+      <stop offset="1" stop-color="#33743E"/>
+    </linearGradient>
+    <linearGradient id="suitG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3B4A5F"/>
+      <stop offset="1" stop-color="#2C384A"/>
+    </linearGradient>
+    <linearGradient id="billG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F6A93B"/>
+      <stop offset="1" stop-color="#E58A25"/>
+    </linearGradient>
+    <clipPath id="plate">
+      <rect x="16" y="16" width="480" height="480" rx="112"/>
+    </clipPath>
+  </defs>
+
+  <!-- Icon plate -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bg)"/>
+
+  <g clip-path="url(#plate)">
+    <!-- Suit shoulders -->
+    <path d="M104 512 C104 414 168 366 256 366 C344 366 408 414 408 512 Z" fill="url(#suitG)"/>
+
+    <!-- Shirt -->
+    <path d="M222 366 L290 366 L264 452 L256 470 L248 452 Z" fill="#F7F5F0"/>
+
+    <!-- Tie -->
+    <path d="M246 368 L266 368 L260 388 L252 388 Z" fill="#C33B4E"/>
+    <path d="M252 388 L260 388 L270 468 L256 494 L242 468 Z" fill="#D9485C"/>
+
+    <!-- Lapels -->
+    <path d="M222 366 L256 470 L214 430 L200 384 Z" fill="#232F40"/>
+    <path d="M290 366 L256 470 L298 430 L312 384 Z" fill="#232F40"/>
+
+    <!-- White neck ring (mallard collar) -->
+    <path d="M208 320 C208 300 228 290 256 290 C284 290 304 300 304 320 L304 372 L208 372 Z" fill="#F7F5F0"/>
+
+    <!-- Head: side-profile mallard facing right -->
+    <path d="M256 96
+             C186 96 138 140 138 208
+             C138 262 168 306 216 322
+             L216 340 L304 340 L304 316
+             C344 296 366 258 366 214
+             L366 200
+             C366 138 320 96 256 96 Z" fill="url(#headG)"/>
+
+    <!-- Green head sheen -->
+    <path d="M180 150 C200 118 240 106 276 112 C238 118 206 132 188 160 Z" fill="#63B56C" opacity="0.8"/>
+
+    <!-- Bill (side profile, pointing right) -->
+    <path d="M366 196
+             C420 190 462 204 474 226
+             C480 240 470 254 448 260
+             C420 268 388 268 366 262
+             Z" fill="url(#billG)"/>
+    <path d="M366 236 C402 244 440 244 466 232 C462 246 448 254 428 258 C404 262 382 260 366 254 Z" fill="#D0741C"/>
+
+    <!-- Eye -->
+    <circle cx="296" cy="182" r="17" fill="#23232C"/>
+    <circle cx="302" cy="176" r="5.5" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Subtle plate border for small-size legibility -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="none" stroke="#4A5B76" stroke-width="4"/>
+</svg>

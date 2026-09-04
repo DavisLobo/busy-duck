@@ -30,6 +30,13 @@ class GoogleProvider(BaseProvider):
     ) -> list[dict[str, Any]]:
         self.connect()
 
+        day = start_datetime.replace(
+            hour=9,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+
         return [
             {
                 "external_id": "google-event-1",
@@ -37,8 +44,8 @@ class GoogleProvider(BaseProvider):
                 "title": "Daily sync",
                 "description": "Daily sync with team",
                 "location": "Remote",
-                "start_datetime": datetime(2025, 1, 1, 9, 0),
-                "end_datetime": datetime(2025, 1, 1, 10, 0),
+                "start_datetime": day,
+                "end_datetime": day.replace(hour=10),
             },
             {
                 "external_id": "google-event-2",
@@ -46,7 +53,7 @@ class GoogleProvider(BaseProvider):
                 "title": "Planning",
                 "description": "Sprint planning",
                 "location": "Office",
-                "start_datetime": datetime(2025, 1, 1, 9, 30),
-                "end_datetime": datetime(2025, 1, 1, 10, 30),
+                "start_datetime": day.replace(hour=9, minute=30),
+                "end_datetime": day.replace(hour=10, minute=30),
             },
         ]
