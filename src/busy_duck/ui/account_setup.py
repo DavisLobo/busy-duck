@@ -11,10 +11,12 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QMessageBox,
     QLineEdit,
+    QPushButton,
     QVBoxLayout,
 )
 
 from busy_duck.app import (
+    delete_account,
     get_connected_accounts,
     sync_all,
     update_account,
@@ -56,6 +58,18 @@ class AccountSetupDialog(QDialog):
         self.accounts_list = QListWidget()
         self.accounts_list.setMinimumHeight(130)
         layout.addWidget(self.accounts_list)
+
+        self.delete_button = QPushButton("Delete selected account")
+        self.delete_button.setCursor(Qt.PointingHandCursor)
+        self.delete_button.setEnabled(False)
+        self.delete_button.clicked.connect(self._delete_selected_account)
+        layout.addWidget(self.delete_button)
+
+        self.accounts_list.itemSelectionChanged.connect(
+            lambda: self.delete_button.setEnabled(
+                bool(self.accounts_list.selectedItems())
+            )
+        )
 
         form_title = QLabel("ADD ACCOUNT")
         form_title.setObjectName("sectionTitle")
@@ -126,9 +140,11 @@ class AccountSetupDialog(QDialog):
             item.setData(Qt.UserRole, account)
             self.accounts_list.addItem(item)
 
-            if not self._accounts_loaded:
-                self.accounts_list.itemDoubleClicked.connect(self._edit_account)
-                self._accounts_loaded = True
+        if not self._accounts_loaded:
+            self.accounts_list.itemDoubleClicked.connect(
+                self._edit_account
+            )
+            self._accounts_loaded = True
         self._accounts_loaded = True
 
     def _connect_account(self) -> None:
@@ -199,5 +215,36 @@ class AccountSetupDialog(QDialog):
         self.email.setText(account["email"])
         self.username.setText(account["username"])
 
-        self.editing_account_id: str | None = account["id"]
+        self.editing_account_id = account["id"]
         self.connect_button.setText("Save changes")
+
+    def _delete_selected_account(self) -> None:
+        items = self.accounts_list.selectedItems()
+
+        if not items:
+            return
+
+        account = items[0].data(Qt.UserRole)
+
+        if not account:
+            return
+
+        answer = QMessageBox.question(
+            self,
+            "Delete account",
+            f"Delete {account['email']} from Busy Duck?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+
+        if answer != QMessageBox.Yes:
+            return
+
+        try:
+            delete_account(account["id"])
+            self.editing_account_id = None
+            self.email.clear()
+            self.username.clear()
+            self._load_accounts()
+        except Exception as exc:
+            QMessageBox.critical(self, "Delete failed", str(exc))

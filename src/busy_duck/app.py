@@ -11,6 +11,7 @@ from busy_duck.repositories.event_repository import EventRepository
 from busy_duck.services.multi_provider_sync_service import MultiProviderSyncService
 from busy_duck.database.models.account_model import AccountModel
 from busy_duck.database.models.provider_model import ProviderModel
+from sqlalchemy import delete
 
 
 def bootstrap_app() -> None:
@@ -130,6 +131,21 @@ def update_account(
         account.username = username
         account.email = email
         account.updated_at = datetime.now()
+        session.commit()
+    finally:
+        session.close()
+
+
+def delete_account(account_id: str) -> None:
+    session = get_session()
+
+    try:
+        account = session.get(AccountModel, account_id)
+
+        if account is None:
+            raise ValueError("Account was not found.")
+
+        session.delete(account)
         session.commit()
     finally:
         session.close()

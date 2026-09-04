@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, time, timedelta
 
-from PySide6.QtCore import QDate, Qt, QItemSelection, QStackedWidget
+from PySide6.QtCore import QDate, Qt, QItemSelection
 from PySide6.QtGui import QAction, QColor, QFont
 from PySide6.QtWidgets import (
     QApplication,
@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QDateEdit,
+    QStackedWidget,
     QTableView,
     QVBoxLayout,
     QWidget,
@@ -63,21 +64,56 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        layout.addWidget(self._build_sidebar())
+        sidebar = self._build_sidebar()
+        layout.addWidget(sidebar)
 
         self.pages = QStackedWidget()
-        self.calendar_page = self._build_content()
-        self.pages.addWidget(self.calendar_page)
+        self.pages.addWidget(self._build_overview_page())  # index 0
+        self.pages.addWidget(self._build_content())        # index 1
         self.pages.addWidget(self._build_info_page(
             "Availability",
-            "Your available time will appear here after calendars are synchronized.",
-        ))
+            "Your available time across connected calendars.",
+        ))                                                   # index 2
         self.pages.addWidget(self._build_info_page(
             "Insights",
-            "Calendar analytics and productivity insights are coming soon.",
-        ))
+            "Calendar analytics and productivity insights.",
+        ))                                                   # index 3
+
         layout.addWidget(self.pages, 1)
 
+        self.pages.setCurrentIndex(0)
+        self.nav_buttons["Overview"].setChecked(True)
+
+    def _build_overview_page(self) -> QWidget:
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(40, 34, 40, 30)
+        layout.setSpacing(16)
+
+        title = QLabel("Overview")
+        title.setObjectName("pageTitle")
+
+        description = QLabel(
+            "A high-level summary of your unified calendar."
+        )
+        description.setObjectName("pageSubtitle")
+        description.setWordWrap(True)
+
+        open_calendar = QPushButton("Open calendar")
+        open_calendar.setObjectName("primaryButton")
+        open_calendar.setCursor(Qt.PointingHandCursor)
+        open_calendar.clicked.connect(
+            lambda: self.select_page(1, "Calendar")
+        )
+
+        layout.addWidget(title)
+        layout.addWidget(description)
+        layout.addSpacing(20)
+        layout.addWidget(open_calendar)
+        layout.addStretch()
+
+        return page
+    
     def _build_info_page(self, title: str, description: str) -> QWidget:
         page = QWidget()
         layout = QVBoxLayout(page)
@@ -120,9 +156,9 @@ class MainWindow(QMainWindow):
 
         navigation = (
             ("Overview", 0),
-            ("Calendar", 0),
-            ("Availability", 1),
-            ("Insights", 2),
+            ("Calendar", 1),
+            ("Availability", 2),
+            ("Insights", 3),
         )
 
         for label, page_index in navigation:
@@ -136,8 +172,6 @@ class MainWindow(QMainWindow):
             )
             self.nav_buttons[label] = button
             layout.addWidget(button)
-
-        self.nav_buttons["Calendar"].setChecked(True)
 
         layout.addSpacing(24)
 
@@ -197,10 +231,14 @@ class MainWindow(QMainWindow):
         self.theme_button = QPushButton("☾")
         self.theme_button.setObjectName("themeButton")
         self.theme_button.setCursor(Qt.PointingHandCursor)
+        self.theme_button.clicked.connect(self.toggle_theme)
 
         self.sync_button = QPushButton("↻  Sync calendars")
         self.sync_button.setObjectName("primaryButton")
+        self.sync_button.setCursor(Qt.PointingHandCursor)
         self.sync_button.clicked.connect(self.sync_all_providers)
+
+        header.addWidget(self.theme_button)
         header.addWidget(self.sync_button)
 
         layout.addLayout(header)
@@ -433,7 +471,9 @@ class MainWindow(QMainWindow):
 
     def toggle_theme(self) -> None:
         self.dark_mode = not self.dark_mode
-        self.setStyleSheet(DARK_THEME if self.dark_mode else LIGHT_THEME)
+        self.setStyleSheet(
+            DARK_THEME if self.dark_mode else LIGHT_THEME
+        )
         self.theme_button.setText("☀" if self.dark_mode else "☾")
 
     def _show_selected_event(
@@ -475,5 +515,5 @@ class MainWindow(QMainWindow):
         for label, button in self.nav_buttons.items():
             button.setChecked(label == name)
 
-        if index == 0:
+        if name == "Calendar":
             self.refresh_events()
