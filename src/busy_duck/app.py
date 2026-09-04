@@ -87,8 +87,6 @@ def get_analytics_for_window(
 
 def main() -> None:
     bootstrap_app()
-    result = sync_all()
-    print(result)
 
 
 if __name__ == "__main__":

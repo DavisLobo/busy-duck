@@ -30,6 +30,13 @@ class OutlookProvider(BaseProvider):
     ) -> list[dict[str, Any]]:
         self.connect()
 
+        day = start_datetime.replace(
+            hour=11,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+
         return [
             {
                 "external_id": "outlook-event-1",
@@ -37,8 +44,8 @@ class OutlookProvider(BaseProvider):
                 "title": "Client sync",
                 "description": "Sync with client",
                 "location": "Teams",
-                "start_datetime": datetime(2025, 1, 1, 11, 0),
-                "end_datetime": datetime(2025, 1, 1, 12, 0),
+                "start_datetime": day,
+                "end_datetime": day.replace(hour=12),
             },
             {
                 "external_id": "outlook-event-2",
@@ -46,7 +53,7 @@ class OutlookProvider(BaseProvider):
                 "title": "Ops review",
                 "description": "Operations review",
                 "location": "Remote",
-                "start_datetime": datetime(2025, 1, 1, 13, 30),
-                "end_datetime": datetime(2025, 1, 1, 14, 30),
+                "start_datetime": day.replace(hour=13, minute=30),
+                "end_datetime": day.replace(hour=14, minute=30),
             },
         ]
