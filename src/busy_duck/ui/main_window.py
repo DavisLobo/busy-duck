@@ -39,6 +39,7 @@ class MainWindow(QMainWindow):
         self.resize(1360, 820)
         self.setMinimumSize(1050, 650)
 
+        self.dark_mode = False
         self.events = []
         self.model = EventTableModel()
 
