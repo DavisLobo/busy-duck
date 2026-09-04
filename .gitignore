@@ -219,3 +219,8 @@ __marimo__/
 
 #Busy_Duck
 data/
+
+# Release outputs
+release/
+*.zip
+*.tar.gz
